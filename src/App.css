@@ -1,0 +1,28 @@
+.App {
+  width: 100vw;
+  height: 100vh;
+
+  background-color: #232020;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+}
+
+canvas {
+  position: absolute;
+}
+
+#game {
+  z-index: 1;
+}
+
+#actions {
+  z-index: 2;
+}
+
+#hud {
+  z-index: 3;
+}
