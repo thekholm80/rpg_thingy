@@ -17,6 +17,7 @@ class Main {
     this.gameLevel = '1-1';
     this.level = new Level(this.gameLevel);
     this.player = 'mage'; // this will be changed when player is built
+    this.target = '';
 
     this.spriteLoader = new SpriteLoader(this.gameContext);
 
@@ -39,9 +40,12 @@ class Main {
 
     function clickHandler(event) {
       const rect = this.getBoundingClientRect();
+      // magic by Ben
       const coords = {
-        x: Math.round((event.clientX - rect.left) / 50) * 50,
-        y: Math.round((event.clientY - rect.top) / 50) * 50
+        x: Math.round(((event.clientX - rect.left) - 25) / 50) - 8,
+        y: Math.round(((event.clientY - rect.top) - 25) / 50) -5,
+        spawnX: Math.round(((event.clientX - rect.left) - 25) / 50) * 50,
+        spawnY: Math.round(((event.clientY - rect.top) - 25) / 50) * 50
       }
       processClick(coords);
     }
@@ -49,13 +53,16 @@ class Main {
     canvas.onclick = clickHandler;
   }
 
-  processClick({ x, y }) {
+  processClick({ x, y, spawnX, spawnY }) {
     const { level: { playerLocation, map } } = this;
-    let transX = ((400 + (-x)) / 50) + 1;  // sign is reversed, math is hard
-    let transY = ((250 + (-y)) / 50) + 1;
-    transX = transX > 0 ? -Math.abs(transX) : Math.abs(transX);
-    const lookUp = `${ playerLocation.x + transX },${ playerLocation.y + transY }`;
+    const lookUp = `${ playerLocation.x + x },${ playerLocation.y + y }`;
+
+    // if (this.target) this.target = '';  // update this once clicking is sorted out
     console.log(lookUp, map[lookUp]);
+    if (map.hasOwnProperty(lookUp) && map[lookUp] !== 'floor') {
+      this.targetSprite(spawnX, spawnY);
+    }
+    console.log(x, y);
   }
 
   drawScreen() {
@@ -114,29 +121,43 @@ class Main {
 
   handleKeyPress(keyCode) {
     switch (keyCode) {  
+      // move left
       case 65:  // 'a'
       case 37:  // left arrow
         this.move(`${ this.level.playerLocation.x - 1 },${ this.level.playerLocation.y }`);
         break;
 
+      // move up
       case 87:  // 'w'
       case 38:  // up arrow
         this.move(`${ this.level.playerLocation.x },${ this.level.playerLocation.y - 1 }`);
         break;
 
+      // move right
       case 68:  // 'd'
       case 39:  // right arrow
         this.move(`${ this.level.playerLocation.x + 1 },${ this.level.playerLocation.y }`);
         break;
 
+      // move down
       case 83:  // 's'
       case 40:  // down arrow
         this.move(`${ this.level.playerLocation.x },${ this.level.playerLocation.y + 1 }`);
         break;
 
+      // target self
+      case 192: // '`'
+        this.targetSprite(400, 250);
+        break;
+
       default:
         break;
     }
+  }
+
+  targetSprite(x, y) {
+    this.spriteLoader.load(x, y, 'target_ring');
+    this.target = 'player';
   }
 
   move(newLocation) {
